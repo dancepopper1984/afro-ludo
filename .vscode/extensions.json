@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "Dart-Code.flutter",
+    "Dart-Code.dart-code",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "eamodio.gitlens",
+    "ms-vscode.powershell"
+  ]
+}

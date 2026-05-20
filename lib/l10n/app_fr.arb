@@ -1,0 +1,50 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Afro Ludo",
+  "playLudo": "Jouer au Ludo",
+  "settings": "Parametres",
+  "shop": "Boutique",
+  "stats": "Statistiques",
+
+  "soundEffects": "Effets Sonores",
+  "enableGameSounds": "Activer les sons du jeu",
+  "hapticFeedback": "Retour Haptique",
+  "vibrationOnActions": "Vibration lors des actions",
+  "aiDifficulty": "Difficulte IA",
+  "language": "Langue",
+  "boardTheme": "Theme du Plateau",
+  "resetOnboarding": "Reinitialiser l'Introduction",
+
+  "dailyCheckIn": "Connexion Quotidienne",
+  "youEarned": "Vous avez gagne",
+  "youHaveAlreadyCheckedIn": "Vous vous etes deja connecte aujourd'hui.",
+  "claim": "Recuperer",
+  "dayStreak": "Serie de {days} jours!",
+
+  "rollDice": "Lancer le De",
+  "rolling": "Lancement...",
+  "noValidMoves": "Aucun coup valide",
+  "gameOver": "Fin du Jeu",
+
+  "wins": "{name} Gagne!",
+  "congratulations": "Felicitations!",
+  "playAgain": "Rejouer",
+  "backToMenu": "Retour au Menu",
+
+  "watchAd": "Regarder une Pub",
+  "earnFreeAfroCoins": "Gagnez des AfroCoins gratuits",
+  "notEnoughAfroCoins": "Pas assez d'AfroCoins",
+  "purchased": "Achat de {name}!",
+
+  "ageVerification": "Verification de l'Age",
+  "ageVerifyDescription": "Pour respecter les lois sur la protection des enfants, nous devons verifier votre age.",
+  "areYou13OrOlder": "Avez-vous 13 ans ou plus?",
+  "yesIAm13OrOlder": "Oui, j'ai 13 ans ou plus",
+  "noIAmUnder13": "Non, j'ai moins de 13 ans",
+  "ageDenyTitle": "Desole",
+  "ageDenyMessage": "Vous devez avoir au moins 13 ans pour utiliser Afro Ludo. L'application va maintenant se fermer.",
+
+  "classic": "Classique",
+  "darkMode": "Mode Sombre",
+  "neon": "Neon"
+}

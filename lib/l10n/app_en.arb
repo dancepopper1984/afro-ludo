@@ -1,0 +1,69 @@
+{
+  "@@locale": "en",
+  "appTitle": "Afro Ludo",
+  "@appTitle": {
+    "description": "Application title"
+  },
+
+  "playLudo": "Play Ludo",
+  "settings": "Settings",
+  "shop": "Shop",
+  "stats": "Stats",
+
+  "soundEffects": "Sound Effects",
+  "enableGameSounds": "Enable game sounds",
+  "hapticFeedback": "Haptic Feedback",
+  "vibrationOnActions": "Vibration on actions",
+  "aiDifficulty": "AI Difficulty",
+  "language": "Language",
+  "boardTheme": "Board Theme",
+  "resetOnboarding": "Reset Onboarding",
+
+  "dailyCheckIn": "Daily Check-In",
+  "youEarned": "You earned",
+  "youHaveAlreadyCheckedIn": "You have already checked in today.",
+  "claim": "Claim",
+  "dayStreak": "{days} Day Streak!",
+  "@dayStreak": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+
+  "rollDice": "Roll Dice",
+  "rolling": "Rolling...",
+  "noValidMoves": "No valid moves",
+  "gameOver": "Game Over",
+
+  "wins": "{name} Wins!",
+  "@wins": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "congratulations": "Congratulations!",
+  "playAgain": "Play Again",
+  "backToMenu": "Back to Menu",
+
+  "watchAd": "Watch Ad",
+  "earnFreeAfroCoins": "Earn free AfroCoins",
+  "notEnoughAfroCoins": "Not enough AfroCoins",
+  "purchased": "Purchased {name}!",
+  "@purchased": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+
+  "ageVerification": "Age Verification",
+  "ageVerifyDescription": "To comply with child safety laws, we need to verify your age.",
+  "areYou13OrOlder": "Are you 13 years of age or older?",
+  "yesIAm13OrOlder": "Yes, I am 13 or older",
+  "noIAmUnder13": "No, I am under 13",
+  "ageDenyTitle": "Sorry",
+  "ageDenyMessage": "You must be at least 13 years old to use Afro Ludo. The app will now close.",
+
+  "classic": "Classic",
+  "darkMode": "Dark Mode",
+  "neon": "Neon"
+}

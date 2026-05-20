@@ -1,0 +1,50 @@
+{
+  "@@locale": "sw",
+  "appTitle": "Afro Ludo",
+  "playLudo": "Cheza Ludo",
+  "settings": "Mipangilio",
+  "shop": "Duka",
+  "stats": "Takwimu",
+
+  "soundEffects": "Sauti za Mchezo",
+  "enableGameSounds": "Wezesha sauti za mchezo",
+  "hapticFeedback": "Mwitiko wa Nguvu",
+  "vibrationOnActions": "Mtikiso wakati wa vitendo",
+  "aiDifficulty": "Ugumu wa AI",
+  "language": "Lugha",
+  "boardTheme": "Mandhari ya Bao",
+  "resetOnboarding": "Weka upya Utangulizi",
+
+  "dailyCheckIn": "Kuingia Kila Siku",
+  "youEarned": "Umepata",
+  "youHaveAlreadyCheckedIn": "Tayari umeingia leo.",
+  "claim": "Chukua",
+  "dayStreak": "Mfululizo wa siku {days}!",
+
+  "rollDice": "Sukuma Kete",
+  "rolling": "Inasukuma...",
+  "noValidMoves": "Hakuna hatua halali",
+  "gameOver": "Mchezo Umemalizika",
+
+  "wins": "{name} Ameshinda!",
+  "congratulations": "Hongera!",
+  "playAgain": "Cheza Tena",
+  "backToMenu": "Rudi kwenye Menyu",
+
+  "watchAd": "Tangaza Tangazo",
+  "earnFreeAfroCoins": "Pata AfroCoins za bure",
+  "notEnoughAfroCoins": "AfroCoins hazitoshi",
+  "purchased": "Umenunua {name}!",
+
+  "ageVerification": "Uthibitisho wa Umri",
+  "ageVerifyDescription": "Ili kuzingatia sheria za ulinzi wa watoto, tunahitaji kuthibitisha umri wako.",
+  "areYou13OrOlder": "Je, una umri wa miaka 13 au zaidi?",
+  "yesIAm13OrOlder": "Ndiyo, nina miaka 13 au zaidi",
+  "noIAmUnder13": "Hapana, nina chini ya miaka 13",
+  "ageDenyTitle": "Pole",
+  "ageDenyMessage": "Lazima uwe na umri wa miaka 13 au zaidi kutumia Afro Ludo. Programu itafungwa sasa.",
+
+  "classic": "Kawaida",
+  "darkMode": "Hali ya Giza",
+  "neon": "Neon"
+}
