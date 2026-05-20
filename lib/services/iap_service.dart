@@ -98,7 +98,7 @@ class IapService {
   Future<bool> purchase(String storeId) async {
     if (!_isAvailable) return false;
 
-    final product = _availableProducts.firstWhere(
+    final _ = _availableProducts.firstWhere(
       (p) => p.storeId == storeId,
       orElse: () => throw ArgumentError('Product $storeId not found'),
     );
