@@ -5,6 +5,7 @@ import 'leaderboard_screen.dart';
 import 'ludo_setup_screen.dart';
 import 'settings_screen.dart';
 import 'shop_screen.dart';
+import 'wheel_screen.dart';
 
 /// 主菜单界面
 class MenuScreen extends ConsumerStatefulWidget {
@@ -56,6 +57,20 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const LudoSetupScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Lucky Wheel 按钮
+              _MenuButton(
+                label: 'Lucky Wheel',
+                icon: Icons.casino,
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const WheelScreen(),
                     ),
                   );
                 },
