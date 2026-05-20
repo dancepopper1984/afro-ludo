@@ -9,6 +9,13 @@ import 'package:url_launcher/url_launcher.dart';
 class ShareService {
   ShareService._();
 
+  static const _appLink = 'https://play.google.com/store/apps/details?id=com.afroludo.game';
+
+  static Future<void> shareApp() async {
+    const text = 'Check out Afro Ludo — a fun African board game! $_appLink';
+    await shareToWhatsApp(text);
+  }
+
   /// 分享战绩到 WhatsApp
   ///
   /// [text] 要分享的文本内容。

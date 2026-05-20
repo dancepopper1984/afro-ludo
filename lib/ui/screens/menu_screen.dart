@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../services/share_service.dart';
 import '../widgets/daily_check_in_dialog.dart';
 import 'achievements_screen.dart';
 import 'leaderboard_screen.dart';
@@ -34,7 +35,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 鏍囬
               Text(
                 'Afro Ludo',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
@@ -51,7 +51,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 48),
 
-              // Play 鎸夐挳
               _MenuButton(
                 label: 'Play Ludo',
                 icon: Icons.videogame_asset,
@@ -65,7 +64,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Lucky Wheel 鎸夐挳
               _MenuButton(
                 label: 'Lucky Wheel',
                 icon: Icons.casino,
@@ -79,7 +77,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Settings 鎸夐挳
               _MenuButton(
                 label: 'Settings',
                 icon: Icons.settings,
@@ -93,7 +90,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Shop 鎸夐挳
               _MenuButton(
                 label: 'Shop',
                 icon: Icons.store,
@@ -107,7 +103,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Stats 鎸夐挳
               _MenuButton(
                 label: 'Stats',
                 icon: Icons.leaderboard,
@@ -121,7 +116,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Achievements 鎸夐挳
               _MenuButton(
                 label: 'Achievements',
                 icon: Icons.emoji_events,
@@ -132,6 +126,13 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                     ),
                   );
                 },
+              ),
+              const SizedBox(height: 16),
+
+              _MenuButton(
+                label: 'Share',
+                icon: Icons.share,
+                onPressed: () => ShareService.shareApp(),
               ),
             ],
           ),

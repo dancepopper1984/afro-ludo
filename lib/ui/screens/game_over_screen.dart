@@ -3,11 +3,8 @@ import '../../core/theme.dart';
 import '../../models/player.dart';
 import '../../services/ad_frequency_controller.dart';
 import '../../services/ad_service.dart';
+import '../../services/share_service.dart';
 
-/// 游戏结束界面
-///
-/// 显示获胜者、排名、奖励金币、返回菜单按钮。
-/// 返回菜单时展示插页广告。
 class GameOverScreen extends StatefulWidget {
   final Player winner;
   final List<Player> rankedPlayers;
@@ -46,6 +43,15 @@ class _GameOverScreenState extends State<GameOverScreen> {
     }
   }
 
+  void _onShare() {
+    final winnerIndex = widget.rankedPlayers.indexWhere((p) => p.id == widget.winner.id);
+    ShareService.shareGameResult(
+      gameName: 'Ludo',
+      position: winnerIndex + 1,
+      totalPlayers: widget.rankedPlayers.length,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,6 +86,19 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   onPressed: widget.onPlayAgain,
                   icon: const Icon(Icons.replay),
                   label: const Text('Play Again'),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _onShare,
+                  icon: const Icon(Icons.share),
+                  label: const Text('Share Victory'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
