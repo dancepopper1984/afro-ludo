@@ -1,19 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/iap_registry.dart';
 import '../../core/skin_registry.dart';
 import '../../models/skin.dart';
 import '../../services/ad_service.dart';
 import '../notifiers/economy_notifier.dart';
+import '../notifiers/iap_notifier.dart';
 import '../notifiers/skin_notifier.dart';
 
 /// 商店界面
-class ShopScreen extends ConsumerWidget {
+class ShopScreen extends ConsumerStatefulWidget {
   const ShopScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ShopScreen> createState() => _ShopScreenState();
+}
+
+class _ShopScreenState extends ConsumerState<ShopScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(iapNotifierProvider.notifier).init();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final economy = ref.watch(economyNotifierProvider);
     final skinState = ref.watch(skinNotifierProvider);
+    final iapState = ref.watch(iapNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -33,7 +49,26 @@ class ShopScreen extends ConsumerWidget {
               onWatchAd: () => _watchAd(context, ref),
             ),
           ),
-          const SizedBox(height: 12),
+          // IAP 金币包
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _IapSection(
+              onPurchase: (storeId) => _onIapPurchase(context, ref, storeId),
+              isPurchasing: iapState.isPurchasing,
+              error: iapState.error,
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'Skins',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ),
+          const SizedBox(height: 8),
 
           Expanded(
             child: ListView.builder(
@@ -102,6 +137,12 @@ class ShopScreen extends ConsumerWidget {
     }
   }
 
+  void _onIapPurchase(
+    BuildContext context, WidgetRef ref, String storeId) async {
+    final notifier = ref.read(iapNotifierProvider.notifier);
+    await notifier.purchase(storeId);
+  }
+
   void _watchAd(BuildContext context, WidgetRef ref) {
     final adService = AdService();
     adService.loadRewardedAd().then((_) {
@@ -118,6 +159,60 @@ class ShopScreen extends ConsumerWidget {
         },
       );
     });
+  }
+}
+
+class _IapSection extends StatelessWidget {
+  final void Function(String storeId) onPurchase;
+  final bool isPurchasing;
+  final String? error;
+
+  const _IapSection({
+    required this.onPurchase,
+    required this.isPurchasing,
+    this.error,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Buy Coins',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 8),
+        for (final p in IapRegistry.all)
+          Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.amber.withValues(alpha: 0.2),
+                child: const Icon(Icons.monetization_on, color: Colors.amber),
+              ),
+              title: Text(p.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text('+${p.coinReward} AfroCoins'),
+              trailing: ElevatedButton(
+                onPressed: isPurchasing ? null : () => onPurchase(p.storeId),
+                child: Text(p.priceDisplay),
+              ),
+            ),
+          ),
+        if (error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              error!,
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.error, fontSize: 12),
+            ),
+          ),
+        const SizedBox(height: 12),
+      ],
+    );
   }
 }
 
@@ -318,6 +413,68 @@ class _ShopItemCard extends StatelessWidget {
                     )
                   : null,
               child: Text(_actionLabel),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _IapSection extends StatelessWidget {
+  final void Function(String storeId) onPurchase;
+  final bool isPurchasing;
+  final String? error;
+
+  const _IapSection({
+    required this.onPurchase,
+    required this.isPurchasing,
+    this.error,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Buy AfroCoins",
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(error!, style: TextStyle(color: theme.colorScheme.error, fontSize: 12)),
+              ),
+            Row(
+              children: [
+                for (final product in IapRegistry.all)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: ElevatedButton(
+                        onPressed: isPurchasing ? null : () => onPurchase(product.storeId),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text("+${product.coinReward}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text(product.priceDisplay, style: const TextStyle(fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         ),

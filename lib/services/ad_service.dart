@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'ad_frequency_controller.dart';
 
 /// 广告服务
 ///
-/// 封装 AdMob 激励视频和插页广告。
+/// 封装 AdMob 激励视频、插页广告和 Banner 广告。
 /// 使用测试 ID，上架前必须替换为生产 ID。
+/// 插页广告通过 AdFrequencyController 控制频次。
 class AdService {
   static final AdService _instance = AdService._internal();
   factory AdService() => _instance;
@@ -12,8 +14,12 @@ class AdService {
 
   RewardedAd? _rewardedAd;
   InterstitialAd? _interstitialAd;
+  BannerAd? _bannerAd;
   bool _isRewardedLoading = false;
   bool _isInterstitialLoading = false;
+
+  final _interstitialController = AdFrequencyController.interstitial();
+  final _bannerController = AdFrequencyController.banner();
 
   // === 测试注入点 ===
 
@@ -28,6 +34,12 @@ class AdService {
 
   @visibleForTesting
   set interstitialAd(InterstitialAd? ad) => _interstitialAd = ad;
+
+  @visibleForTesting
+  BannerAd? get bannerAd => _bannerAd;
+
+  @visibleForTesting
+  set bannerAd(BannerAd? ad) => _bannerAd = ad;
 
   @visibleForTesting
   bool get isRewardedLoading => _isRewardedLoading;
@@ -47,6 +59,8 @@ class AdService {
       'ca-app-pub-3940256099942544/5224354917'; // 测试 ID
   static const String _interstitialAdUnitId =
       'ca-app-pub-3940256099942544/1033173712'; // 测试 ID
+  static const String _bannerAdUnitId =
+      'ca-app-pub-3940256099942544/6300978111'; // 测试 ID
 
   // === 初始化 ===
 
@@ -137,14 +151,23 @@ class AdService {
     );
   }
 
-  /// 展示插页广告
+  /// 展示插页广告（自动受频次控制）
+  ///
+  /// 如果频次控制器不允许展示，直接调用 [onDismissed] 不展示广告。
   Future<void> showInterstitialAd({void Function()? onDismissed}) async {
+    if (!_interstitialController.canShow()) {
+      onDismissed?.call();
+      return;
+    }
+
     final ad = _interstitialAd;
     if (ad == null) {
       await loadInterstitialAd();
       onDismissed?.call();
       return;
     }
+
+    _interstitialController.recordShow();
 
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
@@ -163,6 +186,41 @@ class AdService {
     ad.show();
   }
 
+  // === Banner 广告 ===
+
+  /// 加载 Banner 广告
+  ///
+  /// 返回 BannerAd widget 用于嵌入界面底部。
+  /// 如果频次控制器已达今日上限，返回 null。
+  BannerAd? createBannerAd({
+    required AdSize size,
+    void Function(Ad)? onAdLoaded,
+    void Function(LoadAdError)? onAdFailedToLoad,
+  }) {
+    if (!_bannerController.canShow()) return null;
+
+    final ad = BannerAd(
+      adUnitId: _bannerAdUnitId,
+      size: size,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          _bannerAd = ad as BannerAd;
+          onAdLoaded?.call(ad);
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          _bannerAd = null;
+          onAdFailedToLoad?.call(error);
+        },
+      ),
+    );
+
+    ad.load();
+    _bannerController.recordShow();
+    return ad;
+  }
+
   // === 释放 ===
 
   void dispose() {
@@ -170,5 +228,7 @@ class AdService {
     _rewardedAd = null;
     _interstitialAd?.dispose();
     _interstitialAd = null;
+    _bannerAd?.dispose();
+    _bannerAd = null;
   }
 }

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/daily_check_in_dialog.dart';
+import 'achievements_screen.dart';
 import 'leaderboard_screen.dart';
 import 'ludo_setup_screen.dart';
 import 'settings_screen.dart';
 import 'shop_screen.dart';
+import '../widgets/banner_ad_widget.dart';
 import 'wheel_screen.dart';
 
-/// 主菜单界面
+/// Main menu screen.
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
 
@@ -32,7 +34,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 标题
+              // 鏍囬
               Text(
                 'Afro Ludo',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
@@ -49,7 +51,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 48),
 
-              // Play 按钮
+              // Play 鎸夐挳
               _MenuButton(
                 label: 'Play Ludo',
                 icon: Icons.videogame_asset,
@@ -63,7 +65,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Lucky Wheel 按钮
+              // Lucky Wheel 鎸夐挳
               _MenuButton(
                 label: 'Lucky Wheel',
                 icon: Icons.casino,
@@ -77,7 +79,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Settings 按钮
+              // Settings 鎸夐挳
               _MenuButton(
                 label: 'Settings',
                 icon: Icons.settings,
@@ -91,7 +93,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Shop 按钮
+              // Shop 鎸夐挳
               _MenuButton(
                 label: 'Shop',
                 icon: Icons.store,
@@ -105,7 +107,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Stats 按钮
+              // Stats 鎸夐挳
               _MenuButton(
                 label: 'Stats',
                 icon: Icons.leaderboard,
@@ -117,10 +119,25 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                   );
                 },
               ),
+              const SizedBox(height: 16),
+
+              // Achievements 鎸夐挳
+              _MenuButton(
+                label: 'Achievements',
+                icon: Icons.emoji_events,
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const AchievementsScreen(),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
       ),
+      bottomSheet: const BannerAdWidget(),
     );
   }
 }

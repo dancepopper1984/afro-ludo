@@ -5,12 +5,14 @@ import '../../models/game_state.dart';
 import '../../models/piece.dart';
 import '../../models/player.dart';
 import '../../services/achievement_service.dart';
+import '../../services/ad_service.dart';
 import '../../services/audio_service.dart';
 import '../../services/haptic_service.dart';
 import '../../services/storage_service.dart';
 import '../../ui/notifiers/economy_notifier.dart';
 import '../../ui/notifiers/game_notifier.dart';
 import '../../ui/notifiers/skin_notifier.dart';
+import 'achievements_screen.dart';
 import 'game_over_screen.dart';
 import '../widgets/board_painter.dart';
 import '../widgets/dice_widget.dart';
@@ -142,9 +144,16 @@ class _LudoGameScreenState extends ConsumerState<LudoGameScreen> {
       if (rewardCoins > 0) {
         ref.read(economyNotifierProvider.notifier).addCoins(rewardCoins);
       }
+      if (mounted) {
+        await showAchievementUnlockDialog(context, newAchievements);
+      }
     }
 
     if (!mounted) return;
+
+    // 预加载插页广告（频次控制自动判断是否展示）
+    AdService().loadInterstitialAd();
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => GameOverScreen(

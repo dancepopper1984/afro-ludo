@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 import '../../models/player.dart';
+import '../../services/ad_frequency_controller.dart';
 import '../../services/ad_service.dart';
 
 /// 游戏结束界面
@@ -26,6 +27,8 @@ class GameOverScreen extends StatefulWidget {
 }
 
 class _GameOverScreenState extends State<GameOverScreen> {
+  static final _interstitialController = AdFrequencyController.interstitial();
+
   @override
   void initState() {
     super.initState();
@@ -33,9 +36,14 @@ class _GameOverScreenState extends State<GameOverScreen> {
   }
 
   void _onBackToMenu() {
-    AdService().showInterstitialAd(
-      onDismissed: widget.onBackToMenu,
-    );
+    if (_interstitialController.canShow()) {
+      _interstitialController.recordShow();
+      AdService().showInterstitialAd(
+        onDismissed: widget.onBackToMenu,
+      );
+    } else {
+      widget.onBackToMenu();
+    }
   }
 
   @override

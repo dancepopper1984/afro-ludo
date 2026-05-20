@@ -1,11 +1,30 @@
 import 'package:flutter/material.dart';
+import '../../core/achievement_registry.dart';
+import '../../models/achievement.dart';
+import '../../services/achievement_service.dart';
 import '../../services/storage_service.dart';
 
-/// 排行榜 / 统计界面
-///
-/// 展示玩家本地游戏统计：胜场、败场、胜率、连胜记录。
-class LeaderboardScreen extends StatelessWidget {
+class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
+
+  @override
+  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
+}
+
+class _LeaderboardScreenState extends State<LeaderboardScreen> {
+  List<String> _unlockedIds = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAchievements();
+  }
+
+  void _loadAchievements() {
+    setState(() {
+      _unlockedIds = AchievementService.getUnlockedIds();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,58 +43,62 @@ class LeaderboardScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Padding(
+      body: ListView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // 总览卡片
-            _StatOverviewCard(
-              totalGames: totalGames,
-              winRate: winRate,
-              currentStreak: currentStreak,
+        children: [
+          _StatOverviewCard(
+            totalGames: totalGames,
+            winRate: winRate,
+            currentStreak: currentStreak,
+          ),
+          const SizedBox(height: 16),
+          _StatDetailTile(
+            icon: Icons.emoji_events,
+            label: 'Total Wins',
+            value: '$wins',
+            color: Colors.amber,
+          ),
+          const SizedBox(height: 8),
+          _StatDetailTile(
+            icon: Icons.close,
+            label: 'Total Losses',
+            value: '$losses',
+            color: Colors.red,
+          ),
+          const SizedBox(height: 8),
+          _StatDetailTile(
+            icon: Icons.local_fire_department,
+            label: 'Best Win Streak',
+            value: '$bestStreak',
+            color: Colors.orange,
+          ),
+          const SizedBox(height: 8),
+          _StatDetailTile(
+            icon: Icons.trending_up,
+            label: 'Current Streak',
+            value: '$currentStreak',
+            color: Colors.green,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Achievements',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          for (final achievement in AchievementRegistry.all)
+            _AchievementCard(
+              achievement: achievement,
+              isUnlocked: _unlockedIds.contains(achievement.id),
             ),
-            const SizedBox(height: 16),
-
-            // 详细统计
-            _StatDetailTile(
-              icon: Icons.emoji_events,
-              label: 'Total Wins',
-              value: '$wins',
-              color: Colors.amber,
-            ),
-            const SizedBox(height: 8),
-            _StatDetailTile(
-              icon: Icons.close,
-              label: 'Total Losses',
-              value: '$losses',
-              color: Colors.red,
-            ),
-            const SizedBox(height: 8),
-            _StatDetailTile(
-              icon: Icons.local_fire_department,
-              label: 'Best Win Streak',
-              value: '$bestStreak',
-              color: Colors.orange,
-            ),
-            const SizedBox(height: 8),
-            _StatDetailTile(
-              icon: Icons.trending_up,
-              label: 'Current Streak',
-              value: '$currentStreak',
-              color: Colors.green,
-            ),
-
-            const Spacer(),
-
-            // 重置统计
-            TextButton.icon(
-              onPressed: () => _confirmReset(context),
-              icon: const Icon(Icons.delete_outline),
-              label: const Text('Reset Stats'),
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-            ),
-          ],
-        ),
+          const SizedBox(height: 24),
+          TextButton.icon(
+            onPressed: () => _confirmReset(context),
+            icon: const Icon(Icons.delete_outline),
+            label: const Text('Reset Stats'),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+          ),
+          const SizedBox(height: 32),
+        ],
       ),
     );
   }
@@ -85,7 +108,7 @@ class LeaderboardScreen extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Reset Stats?'),
-        content: const Text('This will permanently clear all your game statistics.'),
+        content: const Text('This will clear your game statistics. Achievements will remain unlocked.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -225,6 +248,67 @@ class _StatDetailTile extends StatelessWidget {
           value,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
+      ),
+    );
+  }
+}
+
+class _AchievementCard extends StatelessWidget {
+  final Achievement achievement;
+  final bool isUnlocked;
+
+  const _AchievementCard({
+    required this.achievement,
+    required this.isUnlocked,
+  });
+
+  IconData get _icon {
+    switch (achievement.iconName) {
+      case 'emoji_events':
+        return Icons.emoji_events;
+      case 'local_fire_department':
+        return Icons.local_fire_department;
+      case 'whatshot':
+        return Icons.whatshot;
+      case 'military_tech':
+        return Icons.military_tech;
+      case 'verified':
+        return Icons.verified;
+      case 'account_balance':
+        return Icons.account_balance;
+      default:
+        return Icons.star;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = isUnlocked ? Colors.amber : Colors.grey.shade400;
+
+    return Card(
+      color: isUnlocked
+          ? Colors.amber.withValues(alpha: 0.08)
+          : null,
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: color.withValues(alpha: 0.2),
+          child: Icon(_icon, color: color),
+        ),
+        title: Text(
+          achievement.name,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isUnlocked ? null : theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        subtitle: Text(
+          achievement.description,
+          style: TextStyle(fontSize: 12),
+        ),
+        trailing: isUnlocked
+            ? const Icon(Icons.check_circle, color: Colors.amber)
+            : const Icon(Icons.lock_outline, color: Colors.grey),
       ),
     );
   }
