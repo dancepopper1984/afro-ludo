@@ -8,7 +8,7 @@ import '../notifiers/economy_notifier.dart';
 import '../notifiers/iap_notifier.dart';
 import '../notifiers/skin_notifier.dart';
 
-/// 商店界面
+/// 鍟嗗簵鐣岄潰
 class ShopScreen extends ConsumerStatefulWidget {
   const ShopScreen({super.key});
 
@@ -49,7 +49,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
               onWatchAd: () => _watchAd(context, ref),
             ),
           ),
-          // IAP 金币包
+          // IAP 閲戝竵鍖?
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _IapSection(
@@ -154,7 +154,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           );
         },
         onDismissed: () {
-          // 广告关闭后预加载下一条
+          // 骞垮憡鍏抽棴鍚庨鍔犺浇涓嬩竴鏉?
           adService.loadRewardedAd();
         },
       );
@@ -413,68 +413,6 @@ class _ShopItemCard extends StatelessWidget {
                     )
                   : null,
               child: Text(_actionLabel),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _IapSection extends StatelessWidget {
-  final void Function(String storeId) onPurchase;
-  final bool isPurchasing;
-  final String? error;
-
-  const _IapSection({
-    required this.onPurchase,
-    required this.isPurchasing,
-    this.error,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Buy AfroCoins",
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            if (error != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(error!, style: TextStyle(color: theme.colorScheme.error, fontSize: 12)),
-              ),
-            Row(
-              children: [
-                for (final product in IapRegistry.all)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: ElevatedButton(
-                        onPressed: isPurchasing ? null : () => onPurchase(product.storeId),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text("+${product.coinReward}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                            Text(product.priceDisplay, style: const TextStyle(fontSize: 13)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
             ),
           ],
         ),
