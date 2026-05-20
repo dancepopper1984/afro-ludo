@@ -21,6 +21,7 @@ class LudoSetupScreen extends ConsumerStatefulWidget {
 class _LudoSetupScreenState extends ConsumerState<LudoSetupScreen> {
   int _selectedPlayerId = 0;
   AIDifficulty _aiDifficulty = AIDifficulty.medium;
+  bool _passAndPlay = false;
 
   static const List<(String, int)> _playerOptions = [
     ('Red', 0),
@@ -32,7 +33,7 @@ class _LudoSetupScreenState extends ConsumerState<LudoSetupScreen> {
   void _startGame() {
     final players = <Player>[];
     for (final (name, id) in _playerOptions) {
-      final isHuman = id == _selectedPlayerId;
+      final isHuman = _passAndPlay || id == _selectedPlayerId;
       players.add(
         Player.withPieces(
           id: id,
@@ -83,33 +84,57 @@ class _LudoSetupScreenState extends ConsumerState<LudoSetupScreen> {
                 ],
               ),
               const SizedBox(height: 32),
-              Text(
-                'AI Difficulty',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              SegmentedButton<AIDifficulty>(
-                segments: const [
-                  ButtonSegment(
-                    value: AIDifficulty.easy,
-                    label: Text('Easy'),
+              Row(
+                children: [
+                  Text(
+                    'Pass & Play',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  ButtonSegment(
-                    value: AIDifficulty.medium,
-                    label: Text('Medium'),
-                  ),
-                  ButtonSegment(
-                    value: AIDifficulty.hard,
-                    label: Text('Hard'),
+                  const SizedBox(width: 12),
+                  Switch(
+                    value: _passAndPlay,
+                    onChanged: (value) => setState(() => _passAndPlay = value),
                   ),
                 ],
-                selected: {_aiDifficulty},
-                onSelectionChanged: (set) {
-                  if (set.isNotEmpty) {
-                    setState(() => _aiDifficulty = set.first);
-                  }
-                },
               ),
+              Text(
+                _passAndPlay
+                    ? 'All 4 players take turns on this device.'
+                    : 'You vs 3 AI opponents.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              if (!_passAndPlay) ...[
+                const SizedBox(height: 32),
+                Text(
+                  'AI Difficulty',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 16),
+                SegmentedButton<AIDifficulty>(
+                  segments: const [
+                    ButtonSegment(
+                      value: AIDifficulty.easy,
+                      label: Text('Easy'),
+                    ),
+                    ButtonSegment(
+                      value: AIDifficulty.medium,
+                      label: Text('Medium'),
+                    ),
+                    ButtonSegment(
+                      value: AIDifficulty.hard,
+                      label: Text('Hard'),
+                    ),
+                  ],
+                  selected: {_aiDifficulty},
+                  onSelectionChanged: (set) {
+                    if (set.isNotEmpty) {
+                      setState(() => _aiDifficulty = set.first);
+                    }
+                  },
+                ),
+              ],
               const Spacer(),
               SizedBox(
                 width: double.infinity,

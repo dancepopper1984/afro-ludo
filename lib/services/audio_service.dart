@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 
 /// 音频服务
 ///
@@ -14,6 +15,23 @@ class AudioService {
 
   bool _soundEnabled = true;
   bool _initialized = false;
+
+  // === 测试注入点 ===
+
+  @visibleForTesting
+  bool get initialized => _initialized;
+
+  @visibleForTesting
+  set initialized(bool value) => _initialized = value;
+
+  @visibleForTesting
+  AudioPlayer? get bgmPlayer => _bgmPlayer;
+
+  @visibleForTesting
+  set bgmPlayer(AudioPlayer? player) => _bgmPlayer = player;
+
+  @visibleForTesting
+  Map<String, AudioPlayer> get sfxPlayers => _sfxPlayers;
 
   // === 初始化 ===
 

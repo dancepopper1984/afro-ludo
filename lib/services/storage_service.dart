@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 /// 本地存储服务
@@ -16,6 +17,10 @@ class StorageService {
     await Hive.initFlutter();
     _box = await Hive.openBox(_boxName);
   }
+
+  /// 测试注入点
+  @visibleForTesting
+  static void setBox(Box? box) => _box = box;
 
   static Box get _ensureBox {
     if (_box == null) {
@@ -42,6 +47,20 @@ class StorageService {
   static String? getLanguage() => _ensureBox.get('language') as String?;
   static Future<void> setLanguage(String value) => _ensureBox.put('language', value);
 
+  // === Generic ===
+
+  static String? getString(String key) => _ensureBox.get(key) as String?;
+  static Future<void> setString(String key, String? value) =>
+      _ensureBox.put(key, value);
+
+  static int? getInt(String key) => _ensureBox.get(key) as int?;
+  static Future<void> setInt(String key, int? value) =>
+      _ensureBox.put(key, value);
+
+  static bool? getBool(String key) => _ensureBox.get(key) as bool?;
+  static Future<void> setBool(String key, bool? value) =>
+      _ensureBox.put(key, value);
+
   // === Economy ===
 
   static int? getAfroCoins() => _ensureBox.get('afroCoins') as int?;
@@ -63,6 +82,16 @@ class StorageService {
 
   static bool? getAgeVerified() => _ensureBox.get('ageVerified') as bool?;
   static Future<void> setAgeVerified(bool value) => _ensureBox.put('ageVerified', value);
+
+  // === Lucky Wheel ===
+
+  static int? getAdSpinsAvailable() => _ensureBox.get('adSpinsAvailable') as int?;
+  static Future<void> setAdSpinsAvailable(int value) =>
+      _ensureBox.put('adSpinsAvailable', value);
+
+  static String? getLastSpinDate() => _ensureBox.get('lastSpinDate') as String?;
+  static Future<void> setLastSpinDate(String? value) =>
+      _ensureBox.put('lastSpinDate', value);
 
   // === Leaderboard / Stats ===
 

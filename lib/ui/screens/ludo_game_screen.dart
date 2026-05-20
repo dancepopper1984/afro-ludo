@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/game_state.dart';
 import '../../models/piece.dart';
 import '../../models/player.dart';
+import '../../services/achievement_service.dart';
 import '../../services/audio_service.dart';
 import '../../services/haptic_service.dart';
 import '../../services/storage_service.dart';
@@ -131,6 +132,15 @@ class _LudoGameScreenState extends ConsumerState<LudoGameScreen> {
     await StorageService.setTotalLosses(losses);
     await StorageService.setCurrentStreak(currentStreak);
     await StorageService.setBestStreak(newBestStreak);
+
+    // 检查成就解锁
+    final newAchievements = await AchievementService.checkAndUnlock();
+    if (newAchievements.isNotEmpty) {
+      final rewardCoins = AchievementService.calculateRewardCoins(newAchievements);
+      if (rewardCoins > 0) {
+        ref.read(economyNotifierProvider.notifier).addCoins(rewardCoins);
+      }
+    }
 
     if (!mounted) return;
     Navigator.of(context).pushReplacement(

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/skin_registry.dart';
+import '../../models/skin.dart';
 import '../../services/ad_service.dart';
-import '../../services/storage_service.dart';
 import '../notifiers/economy_notifier.dart';
+import '../notifiers/skin_notifier.dart';
 
 /// 商店界面
 class ShopScreen extends ConsumerWidget {
@@ -11,6 +13,7 @@ class ShopScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final economy = ref.watch(economyNotifierProvider);
+    final skinState = ref.watch(skinNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -22,10 +25,8 @@ class ShopScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          // 金币余额卡片
           _CoinBalanceCard(coins: economy.afroCoins),
 
-          // 看广告赚金币
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _WatchAdCard(
@@ -34,47 +35,27 @@ class ShopScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
 
-          // 商品列表
           Expanded(
-            child: ListView(
+            child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              children: [
-                _ShopItemCard(
-                  title: 'Golden Dice',
-                  description: 'Roll in style with a golden dice skin.',
-                  price: 500,
-                  icon: Icons.casino,
-                  color: Colors.amber,
-                  onBuy: () => _buyItem(context, ref, 'Golden Dice', 500),
-                ),
-                const SizedBox(height: 12),
-                _ShopItemCard(
-                  title: 'Neon Board',
-                  description: 'A vibrant neon-colored board theme.',
-                  price: 1000,
-                  icon: Icons.grid_on,
-                  color: Colors.cyan,
-                  onBuy: () => _buyItem(context, ref, 'Neon Board', 1000),
-                ),
-                const SizedBox(height: 12),
-                _ShopItemCard(
-                  title: 'Pro Player Badge',
-                  description: 'Show off your pro status in matches.',
-                  price: 2000,
-                  icon: Icons.emoji_events,
-                  color: Colors.orange,
-                  onBuy: () => _buyItem(context, ref, 'Pro Player Badge', 2000),
-                ),
-                const SizedBox(height: 12),
-                _ShopItemCard(
-                  title: 'Afro Theme Pack',
-                  description: 'Complete African-inspired visual overhaul.',
-                  price: 5000,
-                  icon: Icons.palette,
-                  color: Colors.green,
-                  onBuy: () => _buyItem(context, ref, 'Afro Theme Pack', 5000),
-                ),
-              ],
+              itemCount: SkinRegistry.purchasable.length,
+              itemBuilder: (context, index) {
+                final skin = SkinRegistry.purchasable[index];
+                final isUnlocked = skinState.isUnlocked(skin.id);
+                final isEquipped = skinState.isEquipped(skin.id);
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _ShopItemCard(
+                    skin: skin,
+                    isUnlocked: isUnlocked,
+                    isEquipped: isEquipped,
+                    onAction: () => _onSkinAction(
+                      context, ref, skin, isUnlocked,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -82,35 +63,42 @@ class ShopScreen extends ConsumerWidget {
     );
   }
 
-  void _buyItem(BuildContext context, WidgetRef ref, String name, int price) {
-    final notifier = ref.read(economyNotifierProvider.notifier);
-    final success = notifier.spendCoins(price);
+  void _onSkinAction(
+    BuildContext context,
+    WidgetRef ref,
+    Skin skin,
+    bool isUnlocked,
+  ) {
+    if (isUnlocked) {
+      final notifier = ref.read(skinNotifierProvider.notifier);
+      notifier.equipSkin(skin.id);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Equipped ${skin.name}!')),
+      );
+      return;
+    }
+
+    final economyNotifier = ref.read(economyNotifierProvider.notifier);
+    final skinNotifier = ref.read(skinNotifierProvider.notifier);
+    final currentBalance = ref.read(economyNotifierProvider).afroCoins;
+
+    final success = skinNotifier.buySkin(
+      skin.id,
+      balance: currentBalance,
+      deduct: (price) {
+        economyNotifier.spendCoins(price);
+        return ref.read(economyNotifierProvider).afroCoins;
+      },
+    );
 
     if (success) {
-      _unlockSkinIfApplicable(name);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Purchased $name!')),
+        SnackBar(content: Text('Purchased ${skin.name}!')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Not enough AfroCoins')),
       );
-    }
-  }
-
-  void _unlockSkinIfApplicable(String itemName) {
-    final skinMap = {
-      'Neon Board': 'neon',
-      'Afro Theme Pack': 'dark',
-    };
-    final skinId = skinMap[itemName];
-    if (skinId == null) return;
-
-    final unlocked = StorageService.getUnlockedSkins() ?? ['classic'];
-    if (!unlocked.contains(skinId)) {
-      unlocked.add(skinId);
-      StorageService.setUnlockedSkins(unlocked);
-      StorageService.setActiveSkin(skinId);
     }
   }
 
@@ -234,24 +222,60 @@ class _CoinBalanceCard extends StatelessWidget {
 }
 
 class _ShopItemCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final int price;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onBuy;
+  final Skin skin;
+  final bool isUnlocked;
+  final bool isEquipped;
+  final VoidCallback onAction;
 
   const _ShopItemCard({
-    required this.title,
-    required this.description,
-    required this.price,
-    required this.icon,
-    required this.color,
-    required this.onBuy,
+    required this.skin,
+    required this.isUnlocked,
+    required this.isEquipped,
+    required this.onAction,
   });
+
+  Color get _skinColor {
+    switch (skin.id) {
+      case 'golden_dice':
+        return Colors.amber;
+      case 'neon':
+        return Colors.cyan;
+      case 'pro_badge':
+        return Colors.orange;
+      case 'afro':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData get _skinIcon {
+    switch (skin.iconName) {
+      case 'casino':
+        return Icons.casino;
+      case 'grid_on':
+        return Icons.grid_on;
+      case 'emoji_events':
+        return Icons.emoji_events;
+      case 'palette':
+        return Icons.palette;
+      default:
+        Icons.shopping_bag;
+    }
+    return Icons.shopping_bag;
+  }
+
+  String get _actionLabel {
+    if (isEquipped) return 'Equipped';
+    if (isUnlocked) return 'Equip';
+    return '${skin.price}';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = _skinColor;
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -260,7 +284,7 @@ class _ShopItemCard extends StatelessWidget {
           children: [
             CircleAvatar(
               backgroundColor: color.withValues(alpha: 0.2),
-              child: Icon(icon, color: color),
+              child: Icon(_skinIcon, color: color),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -268,7 +292,7 @@ class _ShopItemCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    skin.name,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -276,18 +300,24 @@ class _ShopItemCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    description,
+                    skin.description,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
             ElevatedButton(
-              onPressed: onBuy,
-              child: Text('$price'),
+              onPressed: isEquipped ? null : onAction,
+              style: isEquipped
+                  ? ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      foregroundColor: theme.colorScheme.onSurfaceVariant,
+                    )
+                  : null,
+              child: Text(_actionLabel),
             ),
           ],
         ),

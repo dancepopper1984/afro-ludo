@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// 广告服务
@@ -13,6 +14,32 @@ class AdService {
   InterstitialAd? _interstitialAd;
   bool _isRewardedLoading = false;
   bool _isInterstitialLoading = false;
+
+  // === 测试注入点 ===
+
+  @visibleForTesting
+  RewardedAd? get rewardedAd => _rewardedAd;
+
+  @visibleForTesting
+  set rewardedAd(RewardedAd? ad) => _rewardedAd = ad;
+
+  @visibleForTesting
+  InterstitialAd? get interstitialAd => _interstitialAd;
+
+  @visibleForTesting
+  set interstitialAd(InterstitialAd? ad) => _interstitialAd = ad;
+
+  @visibleForTesting
+  bool get isRewardedLoading => _isRewardedLoading;
+
+  @visibleForTesting
+  set isRewardedLoading(bool value) => _isRewardedLoading = value;
+
+  @visibleForTesting
+  bool get isInterstitialLoading => _isInterstitialLoading;
+
+  @visibleForTesting
+  set isInterstitialLoading(bool value) => _isInterstitialLoading = value;
 
   // === 广告单元 ID ===
   // TODO: 上架前替换为生产环境 ID
