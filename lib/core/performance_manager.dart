@@ -42,7 +42,7 @@ class PerformanceManager {
   bool _isMonitoring = false;
   final Queue<FrameMetrics> _frames = Queue<FrameMetrics>();
   static const int _maxStoredFrames = 120;
-  static const double _frameBudgetMs = 1000.0 / 60.0; // ~16.67ms for 60 FPS
+  static const double _frameBudgetUs = 16667; // ~16.67ms for 60 FPS
 
   /// 是否正在监控性能
   bool get isMonitoring => _isMonitoring;
@@ -88,7 +88,7 @@ class PerformanceManager {
   int get droppedFramesCount {
     var count = 0;
     for (final frame in _frames) {
-      if (frame.totalSpan.inMicroseconds > 16667) {
+      if (frame.totalSpan.inMicroseconds > _frameBudgetUs) {
         count++;
       }
     }
