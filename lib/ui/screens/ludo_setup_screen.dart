@@ -7,10 +7,9 @@ import 'ludo_game_screen.dart';
 
 /// Ludo 游戏设置界面
 ///
-/// 允许玩家选择：
-/// - 自己的颜色（0-3）
-/// - AI 难度（Easy / Medium / Hard）
-/// - 其他 3 个玩家由 AI 控制
+/// 支持：
+/// - 1 人类 + 3 AI（经典模式，可选 AI 难度）
+/// - 2-4 人类 Pass & Play（本地多人轮流玩）
 class LudoSetupScreen extends ConsumerStatefulWidget {
   const LudoSetupScreen({super.key});
 
@@ -19,9 +18,8 @@ class LudoSetupScreen extends ConsumerStatefulWidget {
 }
 
 class _LudoSetupScreenState extends ConsumerState<LudoSetupScreen> {
-  int _selectedPlayerId = 0;
+  int _humanCount = 1;
   AIDifficulty _aiDifficulty = AIDifficulty.medium;
-  bool _passAndPlay = false;
 
   static const List<(String, int)> _playerOptions = [
     ('Red', 0),
@@ -30,10 +28,24 @@ class _LudoSetupScreenState extends ConsumerState<LudoSetupScreen> {
     ('Blue', 3),
   ];
 
+  static const List<String> _humanLabels = [
+    '1 Player',
+    '2 Players',
+    '3 Players',
+    '4 Players',
+  ];
+
+  static const List<String> _humanDescriptions = [
+    'You vs 3 AI opponents.',
+    '2 humans, 2 AI opponents.',
+    '3 humans, 1 AI opponent.',
+    'All 4 players on this device.',
+  ];
+
   void _startGame() {
     final players = <Player>[];
     for (final (name, id) in _playerOptions) {
-      final isHuman = _passAndPlay || id == _selectedPlayerId;
+      final isHuman = id < _humanCount;
       players.add(
         Player.withPieces(
           id: id,
@@ -67,45 +79,50 @@ class _LudoSetupScreenState extends ConsumerState<LudoSetupScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Select Your Color',
+                'Players',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
-              Wrap(
-                spacing: 12,
-                children: [
-                  for (final (name, id) in _playerOptions)
-                    _ColorChip(
-                      name: name,
-                      color: AfroTheme.playerColors[id],
-                      isSelected: _selectedPlayerId == id,
-                      onTap: () => setState(() => _selectedPlayerId = id),
+              SegmentedButton<int>(
+                segments: [
+                  for (int i = 0; i < 4; i++)
+                    ButtonSegment<int>(
+                      value: i + 1,
+                      label: Text(_humanLabels[i]),
                     ),
                 ],
+                selected: {_humanCount},
+                onSelectionChanged: (set) {
+                  if (set.isNotEmpty) {
+                    setState(() => _humanCount = set.first);
+                  }
+                },
               ),
-              const SizedBox(height: 32),
-              Row(
-                children: [
-                  Text(
-                    'Pass & Play',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(width: 12),
-                  Switch(
-                    value: _passAndPlay,
-                    onChanged: (value) => setState(() => _passAndPlay = value),
-                  ),
-                ],
-              ),
+              const SizedBox(height: 8),
               Text(
-                _passAndPlay
-                    ? 'All 4 players take turns on this device.'
-                    : 'You vs 3 AI opponents.',
+                _humanDescriptions[_humanCount - 1],
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
-              if (!_passAndPlay) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Player Colors',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final (name, id) in _playerOptions)
+                    _PlayerBadge(
+                      name: name,
+                      color: AfroTheme.playerColors[id],
+                      isHuman: id < _humanCount,
+                    ),
+                ],
+              ),
+              if (_humanCount == 1) ...[
                 const SizedBox(height: 32),
                 Text(
                   'AI Difficulty',
@@ -151,30 +168,37 @@ class _LudoSetupScreenState extends ConsumerState<LudoSetupScreen> {
   }
 }
 
-class _ColorChip extends StatelessWidget {
+class _PlayerBadge extends StatelessWidget {
   final String name;
   final Color color;
-  final bool isSelected;
-  final VoidCallback onTap;
+  final bool isHuman;
 
-  const _ColorChip({
+  const _PlayerBadge({
     required this.name,
     required this.color,
-    required this.isSelected,
-    required this.onTap,
+    required this.isHuman,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ChoiceChip(
-      label: Text(name),
-      selected: isSelected,
-      onSelected: (_) => onTap(),
+    return Chip(
       avatar: CircleAvatar(
         backgroundColor: color,
         radius: 10,
       ),
-      selectedColor: color.withValues(alpha: 0.3),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(name),
+          const SizedBox(width: 4),
+          Icon(
+            isHuman ? Icons.person : Icons.computer,
+            size: 14,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ],
+      ),
+      backgroundColor: color.withValues(alpha: 0.1),
     );
   }
 }
