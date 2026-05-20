@@ -11,9 +11,10 @@ class DiceFacePainter extends CustomPainter {
 
   DiceFacePainter({
     required this.value,
-    this.dotColor = Colors.black,
-    this.backgroundColor = Colors.white,
-  });
+    Color? dotColor,
+    Color? backgroundColor,
+  })  : dotColor = dotColor ?? Colors.black,
+      backgroundColor = backgroundColor ?? Colors.white;
 
   /// 各面值对应的点位置（3×3 网格坐标）
   static const Map<int, List<(int, int)>> _dotPositions = {
@@ -77,6 +78,8 @@ class DiceWidget extends StatefulWidget {
   final bool isRolling;
   final VoidCallback? onTap;
   final ValueChanged<int>? onRollComplete;
+  final Color? dotColor;
+  final Color? backgroundColor;
 
   const DiceWidget({
     super.key,
@@ -85,6 +88,8 @@ class DiceWidget extends StatefulWidget {
     this.isRolling = false,
     this.onTap,
     this.onRollComplete,
+    this.dotColor,
+    this.backgroundColor,
   });
 
   @override
@@ -212,7 +217,11 @@ class _DiceWidgetState extends State<DiceWidget>
                 width: widget.size,
                 height: widget.size,
                 child: CustomPaint(
-                  painter: DiceFacePainter(value: _displayValue),
+                  painter: DiceFacePainter(
+                    value: _displayValue,
+                    dotColor: widget.dotColor,
+                    backgroundColor: widget.backgroundColor,
+                  ),
                 ),
               ),
             ),

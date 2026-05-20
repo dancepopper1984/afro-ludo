@@ -67,15 +67,6 @@ class AfroTheme {
     trackArea: Colors.white,
   );
 
-  static const BoardSkin darkSkin = BoardSkin(
-    id: 'dark',
-    name: 'Dark Mode',
-    boardBackground: Color(0xFF263238),
-    boardGridLine: Color(0xFF455A64),
-    homeArea: Color(0xFF37474F),
-    trackArea: Color(0xFF455A64),
-  );
-
   static const BoardSkin neonSkin = BoardSkin(
     id: 'neon',
     name: 'Neon',
@@ -85,10 +76,19 @@ class AfroTheme {
     trackArea: Color(0xFF21262D),
   );
 
+  static const BoardSkin afroSkin = BoardSkin(
+    id: 'afro',
+    name: 'Afro Theme',
+    boardBackground: Color(0xFF3E2723),
+    boardGridLine: Color(0xFF8D6E63),
+    homeArea: Color(0xFFFFB300),
+    trackArea: Color(0xFFEFEBE9),
+  );
+
   static const Map<String, BoardSkin> skins = {
     'classic': classicSkin,
-    'dark': darkSkin,
     'neon': neonSkin,
+    'afro': afroSkin,
   };
 
   // === 文字颜色 ===

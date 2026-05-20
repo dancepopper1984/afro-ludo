@@ -8,7 +8,9 @@ import '../../services/achievement_service.dart';
 import '../../services/audio_service.dart';
 import '../../services/haptic_service.dart';
 import '../../services/storage_service.dart';
+import '../../ui/notifiers/economy_notifier.dart';
 import '../../ui/notifiers/game_notifier.dart';
+import '../../ui/notifiers/skin_notifier.dart';
 import 'game_over_screen.dart';
 import '../widgets/board_painter.dart';
 import '../widgets/dice_widget.dart';
@@ -163,7 +165,10 @@ class _LudoGameScreenState extends ConsumerState<LudoGameScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(gameNotifierProvider);
+    final skinState = ref.watch(skinNotifierProvider);
     final boardSize = MediaQuery.of(context).size.width - 32;
+
+    final isGoldenDice = skinState.activeSkin.id == 'golden_dice';
 
     return Scaffold(
       appBar: AppBar(
@@ -190,7 +195,7 @@ class _LudoGameScreenState extends ConsumerState<LudoGameScreen> {
           ),
 
           // 底部控制栏
-          _buildControlPanel(state),
+          _buildControlPanel(state, isGoldenDice),
         ],
       ),
     );
@@ -222,7 +227,7 @@ class _LudoGameScreenState extends ConsumerState<LudoGameScreen> {
     );
   }
 
-  Widget _buildControlPanel(GameState state) {
+  Widget _buildControlPanel(GameState state, bool isGoldenDice) {
     final isHumanTurn = state.currentPlayer.type == PlayerType.human;
     final canRoll = state.phase == GamePhase.rolling && isHumanTurn && !_isRolling;
     final canSelect = state.phase == GamePhase.selecting && isHumanTurn;
@@ -243,6 +248,8 @@ class _LudoGameScreenState extends ConsumerState<LudoGameScreen> {
               value: state.diceValue == 0 ? null : state.diceValue,
               isRolling: _isRolling,
               onTap: canRoll ? _rollDice : null,
+              dotColor: isGoldenDice ? const Color(0xFF5D4037) : null,
+              backgroundColor: isGoldenDice ? const Color(0xFFFFD54F) : null,
             ),
             const SizedBox(height: 12),
 
