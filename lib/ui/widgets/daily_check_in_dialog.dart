@@ -102,10 +102,14 @@ class DailyCheckInDialog extends ConsumerWidget {
 }
 
 /// 触发每日签到检查并显示弹窗（如需要）
+///
+/// 仅在今日首次签到时弹窗，已签到则静默跳过。
 Future<void> showDailyCheckInIfNeeded(BuildContext context, WidgetRef ref) async {
   final notifier = ref.read(economyNotifierProvider.notifier);
   final reward = notifier.dailyCheckIn(DateTime.now());
   final state = ref.read(economyNotifierProvider);
+
+  if (reward == 0) return;
 
   if (context.mounted) {
     await showDialog(

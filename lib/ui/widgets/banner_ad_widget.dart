@@ -15,7 +15,7 @@ class BannerAdWidget extends StatefulWidget {
 
 class _BannerAdWidgetState extends State<BannerAdWidget> {
   static const String _adUnitId =
-      'ca-app-pub-3940256099942544/6300978111'; // 测试 Banner ID
+      'ca-app-pub-7765853410525635/4263677669'; // 生产 Banner ID
   static final _controller = AdFrequencyController.banner();
 
   BannerAd? _bannerAd;

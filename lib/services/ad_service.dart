@@ -53,14 +53,13 @@ class AdService {
   @visibleForTesting
   set isInterstitialLoading(bool value) => _isInterstitialLoading = value;
 
-  // === 广告单元 ID ===
-  // TODO: 上架前替换为生产环境 ID
+  // === 广告单元 ID（生产环境） ===
   static const String _rewardedAdUnitId =
-      'ca-app-pub-3940256099942544/5224354917'; // 测试 ID
+      'ca-app-pub-7765853410525635/9477687349';
   static const String _interstitialAdUnitId =
-      'ca-app-pub-3940256099942544/1033173712'; // 测试 ID
+      'ca-app-pub-7765853410525635/2950595993';
   static const String _bannerAdUnitId =
-      'ca-app-pub-3940256099942544/6300978111'; // 测试 ID
+      'ca-app-pub-7765853410525635/4263677669';
 
   // === 初始化 ===
 

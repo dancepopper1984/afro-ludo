@@ -33,7 +33,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: Column(
+          child: SingleChildScrollView(
+            child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
@@ -150,6 +151,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ),
             ],
           ),
+            ),
         ),
       ),
       bottomSheet: const BannerAdWidget(),
