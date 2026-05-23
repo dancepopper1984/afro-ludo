@@ -7,8 +7,8 @@ import '../../services/ad_service.dart';
 import '../notifiers/economy_notifier.dart';
 import '../notifiers/iap_notifier.dart';
 import '../notifiers/skin_notifier.dart';
+import '../../core/theme.dart';
 
-/// 鍟嗗簵鐣岄潰
 class ShopScreen extends ConsumerStatefulWidget {
   const ShopScreen({super.key});
 
@@ -42,14 +42,10 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       body: Column(
         children: [
           _CoinBalanceCard(coins: economy.afroCoins),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _WatchAdCard(
-              onWatchAd: () => _watchAd(context, ref),
-            ),
+            child: _WatchAdCard(onWatchAd: () => _watchAd(context, ref)),
           ),
-          // IAP 閲戝竵鍖?
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _IapSection(
@@ -58,18 +54,17 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
               error: iapState.error,
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               'Skins',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: AfroTheme.textPrimary,
                   ),
             ),
           ),
           const SizedBox(height: 8),
-
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -78,16 +73,14 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                 final skin = SkinRegistry.purchasable[index];
                 final isUnlocked = skinState.isUnlocked(skin.id);
                 final isEquipped = skinState.isEquipped(skin.id);
-
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: _ShopItemCard(
                     skin: skin,
                     isUnlocked: isUnlocked,
                     isEquipped: isEquipped,
-                    onAction: () => _onSkinAction(
-                      context, ref, skin, isUnlocked,
-                    ),
+                    onAction: () =>
+                        _onSkinAction(context, ref, skin, isUnlocked),
                   ),
                 );
               },
@@ -105,8 +98,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     bool isUnlocked,
   ) {
     if (isUnlocked) {
-      final notifier = ref.read(skinNotifierProvider.notifier);
-      notifier.equipSkin(skin.id);
+      ref.read(skinNotifierProvider.notifier).equipSkin(skin.id);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Equipped ${skin.name}!')),
       );
@@ -126,21 +118,52 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       },
     );
 
+    if (!mounted) return;
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Purchased ${skin.name}!')),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Not enough AfroCoins')),
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: AfroTheme.surface,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.monetization_on, color: AfroTheme.accentGold),
+              SizedBox(width: 8),
+              Text('Not Enough Coins',
+                  style: TextStyle(color: AfroTheme.textPrimary)),
+            ],
+          ),
+          content: Text(
+            '${skin.name} costs ${skin.price} AfroCoins.\nYou have $currentBalance.',
+            style: const TextStyle(color: AfroTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Watch Ad',
+                  style: TextStyle(color: AfroTheme.secondary)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AfroTheme.primary,
+              ),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
       );
     }
   }
 
   void _onIapPurchase(
-    BuildContext context, WidgetRef ref, String storeId) async {
-    final notifier = ref.read(iapNotifierProvider.notifier);
-    await notifier.purchase(storeId);
+      BuildContext context, WidgetRef ref, String storeId) async {
+    await ref.read(iapNotifierProvider.notifier).purchase(storeId);
   }
 
   void _watchAd(BuildContext context, WidgetRef ref) {
@@ -153,10 +176,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             const SnackBar(content: Text('You earned coins!')),
           );
         },
-        onDismissed: () {
-          // 骞垮憡鍏抽棴鍚庨鍔犺浇涓嬩竴鏉?
-          adService.loadRewardedAd();
-        },
+        onDismissed: () => adService.loadRewardedAd(),
       );
     });
   }
@@ -178,25 +198,36 @@ class _IapSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Buy Coins',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
+        Text('Buy Coins',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AfroTheme.textPrimary,
+                )),
         const SizedBox(height: 8),
         for (final p in IapRegistry.all)
-          Card(
+          Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: AfroTheme.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                  color: AfroTheme.accentGold.withValues(alpha: 0.2)),
+            ),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Colors.amber.withValues(alpha: 0.2),
-                child: const Icon(Icons.monetization_on, color: Colors.amber),
+                backgroundColor: AfroTheme.accentGold.withValues(alpha: 0.15),
+                child: const Icon(Icons.monetization_on,
+                    color: AfroTheme.accentGold),
               ),
               title: Text(p.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text('+${p.coinReward} AfroCoins'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AfroTheme.textPrimary)),
+              subtitle: Text('+${p.coinReward} AfroCoins',
+                  style: const TextStyle(color: AfroTheme.textSecondary)),
               trailing: ElevatedButton(
-                onPressed: isPurchasing ? null : () => onPurchase(p.storeId),
+                onPressed:
+                    isPurchasing ? null : () => onPurchase(p.storeId),
                 child: Text(p.priceDisplay),
               ),
             ),
@@ -204,11 +235,8 @@ class _IapSection extends StatelessWidget {
         if (error != null)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              error!,
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.error, fontSize: 12),
-            ),
+            child: Text(error!,
+                style: const TextStyle(color: AfroTheme.highlight, fontSize: 12)),
           ),
         const SizedBox(height: 12),
       ],
@@ -218,55 +246,52 @@ class _IapSection extends StatelessWidget {
 
 class _WatchAdCard extends StatelessWidget {
   final VoidCallback onWatchAd;
-
   const _WatchAdCard({required this.onWatchAd});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 2,
-      color: theme.colorScheme.secondaryContainer,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AfroTheme.secondary, Color(0xFF148F3B)],
+        ),
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: InkWell(
         onTap: onWatchAd,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              CircleAvatar(
-                backgroundColor: theme.colorScheme.secondary.withValues(alpha: 0.2),
-                child: Icon(
-                  Icons.play_circle_outline,
-                  color: theme.colorScheme.secondary,
-                ),
+              const CircleAvatar(
+                backgroundColor: Colors.white24,
+                child: Icon(Icons.play_circle_outline, color: Colors.white),
               ),
-              const SizedBox(width: 16),
-              Expanded(
+              const SizedBox(width: 14),
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Watch Ad',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Earn free AfroCoins',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
+                    Text('Watch Ad',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.white)),
+                    SizedBox(height: 2),
+                    Text('Earn free AfroCoins',
+                        style: TextStyle(
+                            fontSize: 13, color: Colors.white70)),
                   ],
                 ),
               ),
               ElevatedButton(
                 onPressed: onWatchAd,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AfroTheme.secondary,
+                ),
                 child: const Text('Watch'),
               ),
             ],
@@ -279,7 +304,6 @@ class _WatchAdCard extends StatelessWidget {
 
 class _CoinBalanceCard extends StatelessWidget {
   final int coins;
-
   const _CoinBalanceCard({required this.coins});
 
   @override
@@ -288,28 +312,27 @@ class _CoinBalanceCard extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(12),
+        color: AfroTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border:
+            Border.all(color: AfroTheme.accentGold.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.monetization_on,
-            color: Theme.of(context).colorScheme.primary,
-            size: 32,
-          ),
+          const Icon(Icons.monetization_on,
+              color: AfroTheme.accentGold, size: 32),
           const SizedBox(width: 12),
-          Text(
-            '$coins',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
+          Text('$coins',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AfroTheme.accentGold,
+                  )),
           const Spacer(),
-          Text(
-            'AfroCoins',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          Text('AfroCoins',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: AfroTheme.textSecondary)),
         ],
       ),
     );
@@ -355,9 +378,8 @@ class _ShopItemCard extends StatelessWidget {
       case 'palette':
         return Icons.palette;
       default:
-        Icons.shopping_bag;
+        return Icons.shopping_bag;
     }
-    return Icons.shopping_bag;
   }
 
   String get _actionLabel {
@@ -368,39 +390,35 @@ class _ShopItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final color = _skinColor;
 
-    return Card(
-      elevation: 2,
+    return Container(
+      decoration: BoxDecoration(
+        color: AfroTheme.surface,
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: color.withValues(alpha: 0.2),
+              backgroundColor: color.withValues(alpha: 0.15),
               child: Icon(_skinIcon, color: color),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    skin.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                  Text(skin.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: AfroTheme.textPrimary)),
                   const SizedBox(height: 4),
-                  Text(
-                    skin.description,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+                  Text(skin.description,
+                      style: const TextStyle(
+                          fontSize: 13, color: AfroTheme.textSecondary)),
                 ],
               ),
             ),
@@ -408,10 +426,12 @@ class _ShopItemCard extends StatelessWidget {
               onPressed: isEquipped ? null : onAction,
               style: isEquipped
                   ? ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                      foregroundColor: theme.colorScheme.onSurfaceVariant,
+                      backgroundColor: AfroTheme.surface,
+                      foregroundColor: AfroTheme.textSecondary,
                     )
-                  : null,
+                  : ElevatedButton.styleFrom(
+                      backgroundColor: AfroTheme.primary,
+                    ),
               child: Text(_actionLabel),
             ),
           ],

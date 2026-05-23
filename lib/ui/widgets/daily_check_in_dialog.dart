@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme.dart';
 import '../notifiers/economy_notifier.dart';
+import 'kente_strip.dart';
 
-/// 每日签到弹窗
-///
-/// 显示今日签到奖励和连续签到天数。
 class DailyCheckInDialog extends ConsumerWidget {
   final int reward;
   final int streak;
@@ -17,81 +16,141 @@ class DailyCheckInDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
+      backgroundColor: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AfroTheme.surface,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: AfroTheme.accentGold.withValues(alpha: 0.3),
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.calendar_today,
-              size: 48,
-              color: theme.colorScheme.primary,
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
+              child: const KenteStrip(height: 8, animate: false),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Daily Check-In',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            if (reward > 0) ...[
-              Text(
-                'You earned',
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.monetization_on,
-                    color: Colors.amber.shade700,
-                    size: 32,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '+$reward',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber.shade700,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (streak > 1)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    '$streak Day Streak!',
+                  const Icon(Icons.calendar_today,
+                      size: 48, color: AfroTheme.accentGold),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'Daily Check-In',
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: AfroTheme.textPrimary,
                     ),
                   ),
-                ),
-            ] else ...[
-              Text(
-                'You have already checked in today.',
-                style: theme.textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-            ],
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Claim'),
+                  const SizedBox(height: 10),
+                  if (reward > 0) ...[
+                    const Text('You earned',
+                        style: TextStyle(color: AfroTheme.textSecondary)),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.monetization_on,
+                            color: AfroTheme.accentGold, size: 36),
+                        const SizedBox(width: 8),
+                        Text(
+                          '+$reward',
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            color: AfroTheme.accentGold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    if (streak > 1)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AfroTheme.accentGold.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          '$streak Day Streak!',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AfroTheme.accentGold,
+                          ),
+                        ),
+                      ),
+                    // 连续签到进度
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(7, (i) {
+                        final day = i + 1;
+                        final isActive = day <= streak;
+                        return Container(
+                          width: 32,
+                          height: 32,
+                          margin: const EdgeInsets.symmetric(horizontal: 2),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isActive
+                                ? AfroTheme.accentGold
+                                : AfroTheme.surface,
+                            border: Border.all(
+                              color: isActive
+                                  ? AfroTheme.accentGold
+                                  : AfroTheme.textSecondary.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '$day',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: isActive
+                                    ? const Color(0xFF1A1A2E)
+                                    : AfroTheme.textSecondary,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ] else ...[
+                    const Text(
+                      'You have already checked in today.',
+                      style: TextStyle(color: AfroTheme.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AfroTheme.secondary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: const Text('Claim',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -101,10 +160,8 @@ class DailyCheckInDialog extends ConsumerWidget {
   }
 }
 
-/// 触发每日签到检查并显示弹窗（如需要）
-///
-/// 仅在今日首次签到时弹窗，已签到则静默跳过。
-Future<void> showDailyCheckInIfNeeded(BuildContext context, WidgetRef ref) async {
+Future<void> showDailyCheckInIfNeeded(
+    BuildContext context, WidgetRef ref) async {
   final notifier = ref.read(economyNotifierProvider.notifier);
   final reward = notifier.dailyCheckIn(DateTime.now());
   final state = ref.read(economyNotifierProvider);

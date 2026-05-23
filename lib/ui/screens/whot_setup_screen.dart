@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme.dart';
 import 'whot_game_screen.dart';
 
 class WhotSetupScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class _WhotSetupScreenState extends State<WhotSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AfroTheme.background,
       appBar: AppBar(
         title: const Text('Whot Setup'),
         leading: IconButton(
@@ -27,7 +29,11 @@ class _WhotSetupScreenState extends State<WhotSetupScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Total Players', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Total Players',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AfroTheme.textPrimary)),
             const SizedBox(height: 12),
             SegmentedButton<int>(
               segments: const [
@@ -44,7 +50,11 @@ class _WhotSetupScreenState extends State<WhotSetupScreen> {
               },
             ),
             const SizedBox(height: 32),
-            const Text('Human Players', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Human Players',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AfroTheme.textPrimary)),
             const SizedBox(height: 12),
             SegmentedButton<int>(
               segments: [
@@ -55,9 +65,9 @@ class _WhotSetupScreenState extends State<WhotSetupScreen> {
               onSelectionChanged: (s) => setState(() => _humanCount = s.first),
             ),
             const SizedBox(height: 12),
-            Text(
-              '${_totalPlayers - _humanCount} AI player(s)',
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            const Text(
+              'AI player(s)',
+              style: TextStyle(color: AfroTheme.textSecondary),
               textAlign: TextAlign.center,
             ),
             const Spacer(),
@@ -75,6 +85,8 @@ class _WhotSetupScreenState extends State<WhotSetupScreen> {
               icon: const Icon(Icons.play_arrow),
               label: const Text('Start Game'),
               style: ElevatedButton.styleFrom(
+                backgroundColor: AfroTheme.primary,
+                foregroundColor: AfroTheme.textPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 textStyle: const TextStyle(fontSize: 18),
               ),

@@ -1,21 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 import '../../services/storage_service.dart';
+import 'adinkra_painter.dart';
 
-/// Ludo 棋盘绘制器
-///
-/// 绘制 15×15 标准 Ludo 棋盘：
-/// - 四个 6×6 角为玩家基地（半透明底色）
-/// - 十字形轨道区域（白色背景）
-/// - 四条 home track（5 格，玩家颜色）
-/// - 3×3 中心 home 区域
-/// - 网格线
-///
-/// 棋盘共 15×15 = 225 格，其中：
-/// - 外圈轨道：52 格
-/// - Home track：4 × 5 = 20 格
-/// - Home 中心：3 × 3 = 9 格
-/// - 四个基地：4 × 6 × 6 = 144 格
 class BoardPainter extends CustomPainter {
   final double cellSize;
   final BoardSkin skin;
@@ -31,42 +18,33 @@ class BoardPainter extends CustomPainter {
     _drawBaseAreas(canvas);
     _drawHomeTracks(canvas);
     _drawHomeCenter(canvas);
+    _drawSafeCells(canvas);
     _drawGridLines(canvas);
+    _drawKenteBorder(canvas);
   }
 
-  /// 画整体背景
   void _drawBackground(Canvas canvas) {
     final paint = Paint()..color = skin.boardBackground;
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, boardSize, boardSize),
-      paint,
-    );
+    canvas.drawRect(Rect.fromLTWH(0, 0, boardSize, boardSize), paint);
   }
 
-  /// 画轨道区域（十字形条带）
   void _drawTrackArea(Canvas canvas) {
     final paint = Paint()..color = skin.trackArea;
 
-    // 水平条带：行 6-8，全宽
     canvas.drawRect(
       Rect.fromLTWH(0, 6 * cellSize, boardSize, 3 * cellSize),
       paint,
     );
-
-    // 垂直条带：列 6-8，全高（水平条带已覆盖中心，所以只画上下两部分）
-    // 上部：行 0-5
     canvas.drawRect(
       Rect.fromLTWH(6 * cellSize, 0, 3 * cellSize, 6 * cellSize),
       paint,
     );
-    // 下部：行 9-14
     canvas.drawRect(
       Rect.fromLTWH(6 * cellSize, 9 * cellSize, 3 * cellSize, 6 * cellSize),
       paint,
     );
   }
 
-  /// 画四个基地（6×6 角）
   void _drawBaseAreas(Canvas canvas) {
     final bases = [
       (0, 0, AfroTheme.redPlayer),
@@ -76,7 +54,7 @@ class BoardPainter extends CustomPainter {
     ];
 
     for (final (row, col, color) in bases) {
-      final paint = Paint()..color = color.withValues(alpha: 0.2);
+      final paint = Paint()..color = color.withValues(alpha: 0.25);
       final rect = Rect.fromLTWH(
         col * cellSize,
         row * cellSize,
@@ -85,23 +63,35 @@ class BoardPainter extends CustomPainter {
       );
       canvas.drawRect(rect, paint);
 
-      // 画基地边框
       final borderPaint = Paint()
-        ..color = color
+        ..color = color.withValues(alpha: 0.6)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2;
       canvas.drawRect(rect, borderPaint);
+
+      // 基地内装饰：对角十字线
+      final decoPaint = Paint()
+        ..color = color.withValues(alpha: 0.15)
+        ..strokeWidth = 1;
+      canvas.drawLine(
+        Offset(col * cellSize, row * cellSize),
+        Offset((col + 6) * cellSize, (row + 6) * cellSize),
+        decoPaint,
+      );
+      canvas.drawLine(
+        Offset((col + 6) * cellSize, row * cellSize),
+        Offset(col * cellSize, (row + 6) * cellSize),
+        decoPaint,
+      );
     }
   }
 
-  /// 画 home track（通向中心的 5 格路径）
   void _drawHomeTracks(Canvas canvas) {
     final tracks = [
-      // (row, col, rowCount, colCount, color)
-      (1, 7, 5, 1, AfroTheme.redPlayer),      // Red: 垂直向下，列 7，行 1-5
-      (7, 9, 1, 5, AfroTheme.greenPlayer),    // Green: 水平向左，行 7，列 9-13
-      (7, 1, 1, 5, AfroTheme.yellowPlayer),   // Yellow: 水平向右，行 7，列 1-5
-      (9, 7, 5, 1, AfroTheme.bluePlayer),     // Blue: 垂直向上，列 7，行 9-13
+      (1, 7, 5, 1, AfroTheme.redPlayer),
+      (7, 9, 1, 5, AfroTheme.greenPlayer),
+      (7, 1, 1, 5, AfroTheme.yellowPlayer),
+      (9, 7, 5, 1, AfroTheme.bluePlayer),
     ];
 
     for (final (row, col, rows, cols, color) in tracks) {
@@ -116,7 +106,6 @@ class BoardPainter extends CustomPainter {
     }
   }
 
-  /// 画 home 中心（3×3）
   void _drawHomeCenter(Canvas canvas) {
     final rect = Rect.fromLTWH(
       6 * cellSize,
@@ -124,48 +113,120 @@ class BoardPainter extends CustomPainter {
       3 * cellSize,
       3 * cellSize,
     );
-    final paint = Paint()..color = skin.homeArea;
+    final paint = Paint()..color = skin.homeArea.withValues(alpha: 0.3);
     canvas.drawRect(rect, paint);
 
-    // 画对角线（经典 Ludo 中心装饰）
-    final linePaint = Paint()
-      ..color = skin.boardGridLine
-      ..strokeWidth = 1;
-
-    // 从左上到右下
-    canvas.drawLine(
-      Offset(6 * cellSize, 6 * cellSize),
-      Offset(9 * cellSize, 9 * cellSize),
-      linePaint,
+    // Gye Nyame 符号
+    final symbolSize = cellSize * 2.4;
+    canvas.save();
+    canvas.translate(
+      7.5 * cellSize - symbolSize / 2,
+      7.5 * cellSize - symbolSize / 2,
     );
-    // 从右上到左下
-    canvas.drawLine(
-      Offset(9 * cellSize, 6 * cellSize),
-      Offset(6 * cellSize, 9 * cellSize),
-      linePaint,
+    final symbolPainter = AdinkraPainter(
+      symbol: 'gye_nyame',
+      color: skin.centerSymbolColor,
+      strokeWidth: 2.5,
     );
+    symbolPainter.paint(canvas, Size(symbolSize, symbolSize));
+    canvas.restore();
   }
 
-  /// 画网格线
+  void _drawSafeCells(Canvas canvas) {
+    // Ludo 安全格位置（经典位置）
+    final safeCells = [
+      (2, 2),
+      (2, 12),
+      (8, 1),
+      (8, 13),
+      (12, 2),
+      (12, 12),
+      (6, 8),
+      (8, 8),
+      (8, 6),
+    ];
+
+    final symbolSize = cellSize * 0.6;
+    for (final (row, col) in safeCells) {
+      canvas.save();
+      canvas.translate(
+        (col + 0.5) * cellSize - symbolSize / 2,
+        (row + 0.5) * cellSize - symbolSize / 2,
+      );
+      final symbolPainter = AdinkraPainter(
+        symbol: skin.adinkraSymbol,
+        color: skin.safeCellColor,
+        strokeWidth: 2,
+      );
+      symbolPainter.paint(canvas, Size(symbolSize, symbolSize));
+      canvas.restore();
+    }
+  }
+
   void _drawGridLines(Canvas canvas) {
     final paint = Paint()
-      ..color = skin.boardGridLine
+      ..color = skin.boardGridLine.withValues(alpha: 0.4)
       ..strokeWidth = 0.5;
 
     for (int i = 0; i <= 15; i++) {
       final offset = i * cellSize;
-      // 横线
-      canvas.drawLine(
-        Offset(0, offset),
-        Offset(boardSize, offset),
-        paint,
-      );
-      // 竖线
-      canvas.drawLine(
-        Offset(offset, 0),
-        Offset(offset, boardSize),
-        paint,
-      );
+      canvas.drawLine(Offset(0, offset), Offset(boardSize, offset), paint);
+      canvas.drawLine(Offset(offset, 0), Offset(offset, boardSize), paint);
+    }
+  }
+
+  void _drawKenteBorder(Canvas canvas) {
+    const borderWidth = 6.0;
+    final colors = skin.kenteSequence;
+    final segWidth = cellSize * 1.5;
+    final kentePaint = Paint()..style = PaintingStyle.fill;
+
+    // 上边框
+    for (double x = -borderWidth; x < boardSize + borderWidth; x += segWidth) {
+      for (int ci = 0; ci < colors.length && x + ci * segWidth / colors.length < boardSize + borderWidth; ci++) {
+        kentePaint.color = colors[ci];
+        canvas.drawRect(
+          Rect.fromLTWH(x + ci * segWidth / colors.length, -borderWidth,
+              segWidth / colors.length, borderWidth),
+          kentePaint,
+        );
+      }
+    }
+
+    // 下边框
+    for (double x = -borderWidth; x < boardSize + borderWidth; x += segWidth) {
+      for (int ci = 0; ci < colors.length && x + ci * segWidth / colors.length < boardSize + borderWidth; ci++) {
+        kentePaint.color = colors[ci];
+        canvas.drawRect(
+          Rect.fromLTWH(x + ci * segWidth / colors.length, boardSize,
+              segWidth / colors.length, borderWidth),
+          kentePaint,
+        );
+      }
+    }
+
+    // 左边框
+    for (double y = -borderWidth; y < boardSize + borderWidth; y += segWidth) {
+      for (int ci = 0; ci < colors.length && y + ci * segWidth / colors.length < boardSize + borderWidth; ci++) {
+        kentePaint.color = colors[ci];
+        canvas.drawRect(
+          Rect.fromLTWH(-borderWidth, y + ci * segWidth / colors.length,
+              borderWidth, segWidth / colors.length),
+          kentePaint,
+        );
+      }
+    }
+
+    // 右边框
+    for (double y = -borderWidth; y < boardSize + borderWidth; y += segWidth) {
+      for (int ci = 0; ci < colors.length && y + ci * segWidth / colors.length < boardSize + borderWidth; ci++) {
+        kentePaint.color = colors[ci];
+        canvas.drawRect(
+          Rect.fromLTWH(boardSize, y + ci * segWidth / colors.length,
+              borderWidth, segWidth / colors.length),
+          kentePaint,
+        );
+      }
     }
   }
 
@@ -187,20 +248,34 @@ class BoardSkinSelector {
 class LudoBoard extends StatelessWidget {
   final double size;
 
-  const LudoBoard({
-    super.key,
-    required this.size,
-  });
+  const LudoBoard({super.key, required this.size});
 
   @override
   Widget build(BuildContext context) {
     final cellSize = size / 15;
+    final kenteBorder = 6.0;
+    final totalSize = size + kenteBorder * 2;
 
-    return CustomPaint(
-      size: Size(size, size),
-      painter: BoardPainter(
-        cellSize: cellSize,
-        skin: BoardSkinSelector.current,
+    return SizedBox(
+      width: totalSize,
+      height: totalSize,
+      child: Stack(
+        children: [
+          // Kente 边框层（已包含在 BoardPainter 内）
+          Positioned(
+            left: kenteBorder,
+            top: kenteBorder,
+            child: RepaintBoundary(
+              child: CustomPaint(
+                size: Size(size, size),
+                painter: BoardPainter(
+                  cellSize: cellSize,
+                  skin: BoardSkinSelector.current,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

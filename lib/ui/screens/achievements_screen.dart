@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/achievement_registry.dart';
+import '../../core/theme.dart';
 import '../../models/achievement.dart';
 import '../../services/achievement_service.dart';
 
@@ -26,52 +27,63 @@ class AchievementsScreen extends ConsumerWidget {
           final achievement = AchievementRegistry.all[index];
           final isUnlocked = unlockedIds.contains(achievement.id);
 
-          return Card(
-            elevation: isUnlocked ? 2 : 0,
-            color: isUnlocked ? null : Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(
-                    _iconForName(achievement.iconName),
-                    size: 36,
-                    color: isUnlocked
-                        ? Colors.amber
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          achievement.name,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: isUnlocked ? null : Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          achievement.description,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (isUnlocked)
-                    const Icon(Icons.check_circle, color: Colors.green)
-                  else
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isUnlocked
+                    ? AfroTheme.accentGold.withValues(alpha: 0.08)
+                    : AfroTheme.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: isUnlocked
+                    ? Border.all(
+                        color: AfroTheme.accentGold.withValues(alpha: 0.3))
+                    : null,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
                     Icon(
-                      Icons.lock,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      _iconForName(achievement.iconName),
+                      size: 36,
+                      color: isUnlocked
+                          ? AfroTheme.accentGold
+                          : AfroTheme.textSecondary,
                     ),
-                ],
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            achievement.name,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              color: isUnlocked
+                                  ? AfroTheme.textPrimary
+                                  : AfroTheme.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            achievement.description,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                color: AfroTheme.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isUnlocked)
+                      const Icon(Icons.check_circle,
+                          color: AfroTheme.secondary)
+                    else
+                      const Icon(Icons.lock,
+                          color: AfroTheme.textSecondary),
+                  ],
+                ),
               ),
             ),
           );
@@ -112,47 +124,52 @@ Future<void> showAchievementUnlockDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: AfroTheme.surface,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.emoji_events, size: 56, color: Colors.amber),
+            const Icon(Icons.emoji_events,
+                size: 56, color: AfroTheme.accentGold),
             const SizedBox(height: 12),
             const Text(
               'Achievement Unlocked!',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AfroTheme.textPrimary),
             ),
             const SizedBox(height: 16),
-            Text(
-              a.name,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
+            Text(a.name,
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AfroTheme.textPrimary)),
             const SizedBox(height: 8),
-            Text(
-              a.description,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
+            Text(a.description,
+                style: const TextStyle(
+                    fontSize: 14, color: AfroTheme.textSecondary),
+                textAlign: TextAlign.center),
             if ((a.coinReward ?? 0) > 0) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.amber.shade100,
+                  color: AfroTheme.accentGold.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.monetization_on, size: 20, color: Colors.amber.shade700),
+                    const Icon(Icons.monetization_on,
+                        size: 20, color: AfroTheme.accentGold),
                     const SizedBox(width: 4),
-                    Text(
-                      '+${a.coinReward}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.amber.shade700,
-                      ),
-                    ),
+                    Text('+${a.coinReward}',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AfroTheme.accentGold)),
                   ],
                 ),
               ),
@@ -164,6 +181,9 @@ Future<void> showAchievementUnlockDialog(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AfroTheme.primary,
+              ),
               child: const Text('Continue'),
             ),
           ),

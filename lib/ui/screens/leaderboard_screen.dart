@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/achievement_registry.dart';
+import '../../core/theme.dart';
 import '../../models/achievement.dart';
 import '../../services/achievement_service.dart';
 import '../../services/storage_service.dart';
@@ -33,7 +34,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     final bestStreak = StorageService.getBestStreak() ?? 0;
     final currentStreak = StorageService.getCurrentStreak() ?? 0;
     final totalGames = wins + losses;
-    final winRate = totalGames > 0 ? (wins / totalGames * 100).toStringAsFixed(1) : '0.0';
+    final winRate = totalGames > 0
+        ? (wins / totalGames * 100).toStringAsFixed(1)
+        : '0.0';
 
     return Scaffold(
       appBar: AppBar(
@@ -56,34 +59,31 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             icon: Icons.emoji_events,
             label: 'Total Wins',
             value: '$wins',
-            color: Colors.amber,
+            color: AfroTheme.accentGold,
           ),
-          const SizedBox(height: 8),
           _StatDetailTile(
             icon: Icons.close,
             label: 'Total Losses',
             value: '$losses',
-            color: Colors.red,
+            color: AfroTheme.highlight,
           ),
-          const SizedBox(height: 8),
           _StatDetailTile(
             icon: Icons.local_fire_department,
             label: 'Best Win Streak',
             value: '$bestStreak',
-            color: Colors.orange,
+            color: AfroTheme.primary,
           ),
-          const SizedBox(height: 8),
           _StatDetailTile(
             icon: Icons.trending_up,
             label: 'Current Streak',
             value: '$currentStreak',
-            color: Colors.green,
+            color: AfroTheme.secondary,
           ),
           const SizedBox(height: 24),
-          Text(
-            'Achievements',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text('Achievements',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AfroTheme.textPrimary,
+                  fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
           for (final achievement in AchievementRegistry.all)
             _AchievementCard(
@@ -95,7 +95,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             onPressed: () => _confirmReset(context),
             icon: const Icon(Icons.delete_outline),
             label: const Text('Reset Stats'),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AfroTheme.highlight),
           ),
           const SizedBox(height: 32),
         ],
@@ -107,12 +107,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Reset Stats?'),
-        content: const Text('This will clear your game statistics. Achievements will remain unlocked.'),
+        backgroundColor: AfroTheme.surface,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Reset Stats?',
+            style: TextStyle(color: AfroTheme.textPrimary)),
+        content: const Text(
+            'This will clear your game statistics. Achievements will remain unlocked.',
+            style: TextStyle(color: AfroTheme.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('Cancel',
+                style: TextStyle(color: AfroTheme.textSecondary)),
           ),
           TextButton(
             onPressed: () async {
@@ -127,7 +134,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 );
               }
             },
-            child: const Text('Reset', style: TextStyle(color: Colors.red)),
+            child: const Text('Reset',
+                style: TextStyle(color: AfroTheme.highlight)),
           ),
         ],
       ),
@@ -148,38 +156,28 @@ class _StatOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            theme.colorScheme.primary,
-            theme.colorScheme.primary.withValues(alpha: 0.7),
-          ],
+        gradient: const LinearGradient(
+          colors: [AfroTheme.primary, AfroTheme.primaryDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         children: [
-          Text(
-            '$totalGames',
-            style: theme.textTheme.headlineLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          Text(
-            'Games Played',
-            style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
-                ),
-          ),
-          const SizedBox(height: 16),
+          Text('$totalGames',
+              style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white)),
+          const SizedBox(height: 4),
+          const Text('Games Played',
+              style: TextStyle(fontSize: 14, color: Colors.white70)),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -196,27 +194,19 @@ class _StatOverviewCard extends StatelessWidget {
 class _MiniStat extends StatelessWidget {
   final String label;
   final String value;
-
   const _MiniStat({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Column(
       children: [
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
-              ),
-        ),
+        Text(value,
+            style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: AfroTheme.accentGold)),
+        Text(label,
+            style: const TextStyle(fontSize: 12, color: Colors.white70)),
       ],
     );
   }
@@ -237,16 +227,27 @@ class _StatDetailTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: 0.2),
-          child: Icon(icon, color: color),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AfroTheme.surface,
+          borderRadius: BorderRadius.circular(14),
         ),
-        title: Text(label),
-        trailing: Text(
-          value,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: color.withValues(alpha: 0.15),
+            child: Icon(icon, color: color),
+          ),
+          title: Text(label,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: AfroTheme.textPrimary)),
+          trailing: Text(value,
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: color)),
         ),
       ),
     );
@@ -283,32 +284,38 @@ class _AchievementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = isUnlocked ? Colors.amber : Colors.grey.shade400;
+    final color = isUnlocked ? AfroTheme.accentGold : AfroTheme.textSecondary;
 
-    return Card(
-      color: isUnlocked
-          ? Colors.amber.withValues(alpha: 0.08)
-          : null,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: 0.2),
-          child: Icon(_icon, color: color),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isUnlocked
+              ? AfroTheme.accentGold.withValues(alpha: 0.06)
+              : AfroTheme.surface,
+          borderRadius: BorderRadius.circular(14),
         ),
-        title: Text(
-          achievement.name,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: isUnlocked ? null : theme.colorScheme.onSurfaceVariant,
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: color.withValues(alpha: 0.15),
+            child: Icon(_icon, color: color),
           ),
+          title: Text(
+            achievement.name,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color:
+                  isUnlocked ? AfroTheme.textPrimary : AfroTheme.textSecondary,
+            ),
+          ),
+          subtitle: Text(achievement.description,
+              style:
+                  const TextStyle(fontSize: 12, color: AfroTheme.textSecondary)),
+          trailing: isUnlocked
+              ? const Icon(Icons.check_circle, color: AfroTheme.secondary)
+              : const Icon(Icons.lock_outline,
+                  color: AfroTheme.textSecondary),
         ),
-        subtitle: Text(
-          achievement.description,
-          style: TextStyle(fontSize: 12),
-        ),
-        trailing: isUnlocked
-            ? const Icon(Icons.check_circle, color: Colors.amber)
-            : const Icon(Icons.lock_outline, color: Colors.grey),
       ),
     );
   }

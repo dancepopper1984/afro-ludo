@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme.dart';
 import '../../models/whot_card.dart';
 import '../../models/whot_game_state.dart';
 import '../../services/whot_engine.dart';
@@ -90,14 +91,17 @@ class _WhotGameScreenState extends State<WhotGameScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Call a Shape'),
+        backgroundColor: AfroTheme.surface,
+        title: const Text('Call a Shape',
+            style: TextStyle(color: AfroTheme.textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             for (final shape in WhotShape.values.where((s) => s != WhotShape.whot))
               ListTile(
                 leading: _ShapeIcon(shape: shape, size: 28),
-                title: Text(shape.name),
+                title: Text(shape.name,
+                    style: const TextStyle(color: AfroTheme.textPrimary)),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   setState(() {
@@ -131,6 +135,7 @@ class _WhotGameScreenState extends State<WhotGameScreen> {
     final canDraw = player.isHuman && !WhotEngine.canPlayAny(player.hand, _state);
 
     return Scaffold(
+      backgroundColor: AfroTheme.background,
       appBar: AppBar(
         title: const Text('Whot'),
         leading: IconButton(
@@ -147,10 +152,14 @@ class _WhotGameScreenState extends State<WhotGameScreen> {
                 if (_state.demandedShape != null)
                   Text(
                     'Called: ${_state.demandedShape!.name}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: AfroTheme.accentGold),
                   ),
                 if (_isAiThinking)
-                  const Text('AI thinking...', style: TextStyle(color: Colors.grey)),
+                  const Text('AI thinking...',
+                      style: TextStyle(color: AfroTheme.textSecondary)),
                 Expanded(child: _buildTable()),
                 const SizedBox(height: 8),
                 _buildHand(canDraw),
@@ -176,15 +185,20 @@ class _WhotGameScreenState extends State<WhotGameScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.shade100 : Colors.grey.shade200,
+        color: isActive
+            ? AfroTheme.secondary.withValues(alpha: 0.2)
+            : AfroTheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: isActive ? Border.all(color: Colors.green, width: 2) : null,
+        border: isActive
+            ? Border.all(color: AfroTheme.secondary, width: 2)
+            : Border.all(color: AfroTheme.border, width: 1),
       ),
       child: Text(
         '${p.name} (${p.hand.length})',
         style: TextStyle(
           fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           fontSize: 13,
+          color: isActive ? AfroTheme.textPrimary : AfroTheme.textSecondary,
         ),
       ),
     );
@@ -215,19 +229,28 @@ class _WhotGameScreenState extends State<WhotGameScreen> {
             width: 70,
             height: 100,
             decoration: BoxDecoration(
-              color: Colors.blue.shade700,
+              color: AfroTheme.card,
               borderRadius: BorderRadius.circular(8),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4)],
+              border: Border.all(
+                  color: AfroTheme.accentGold.withValues(alpha: 0.3)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3), blurRadius: 4)
+              ],
             ),
             child: Center(
               child: Text(
                 '${_state.drawPile.length}',
-                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    color: AfroTheme.textPrimary,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold),
               ),
             ),
           ),
           const SizedBox(height: 4),
-          const Text('Draw', style: TextStyle(fontSize: 12)),
+          const Text('Draw',
+              style: TextStyle(fontSize: 12, color: AfroTheme.textSecondary)),
         ],
       ),
     );
@@ -240,7 +263,9 @@ class _WhotGameScreenState extends State<WhotGameScreen> {
       children: [
         _CardWidget(card: top, size: 70),
         const SizedBox(height: 4),
-        Text(top.toString(), style: const TextStyle(fontSize: 12)),
+        Text(top.toString(),
+            style: const TextStyle(
+                fontSize: 12, color: AfroTheme.textSecondary)),
       ],
     );
   }
@@ -252,8 +277,13 @@ class _WhotGameScreenState extends State<WhotGameScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        color: AfroTheme.surface,
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(16)),
+        border: Border(
+          top: BorderSide(
+              color: AfroTheme.accentGold.withValues(alpha: 0.2)),
+        ),
       ),
       child: SafeArea(
         child: SizedBox(
@@ -267,7 +297,8 @@ class _WhotGameScreenState extends State<WhotGameScreen> {
               : Center(
                   child: Text(
                     '${_state.currentPlayer.name} has ${hand.length} cards',
-                    style: const TextStyle(fontSize: 16),
+                    style: const TextStyle(
+                        fontSize: 16, color: AfroTheme.textSecondary),
                   ),
                 ),
         ),
@@ -295,15 +326,22 @@ class _WhotGameScreenState extends State<WhotGameScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.emoji_events, size: 80, color: Colors.amber),
+          const Icon(Icons.emoji_events, size: 80, color: AfroTheme.accentGold),
           const SizedBox(height: 24),
           Text(
             '${winner.name} Wins!',
-            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: AfroTheme.textPrimary),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AfroTheme.primary,
+              foregroundColor: AfroTheme.textPrimary,
+            ),
             child: const Text('Back to Menu'),
           ),
         ],
@@ -324,10 +362,16 @@ class _CardWidget extends StatelessWidget {
       width: size,
       height: size * 1.43,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF2A2A4A),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade400, width: 1.5),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 3, offset: const Offset(0, 2))],
+        border: Border.all(
+            color: AfroTheme.accentGold.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 3,
+              offset: const Offset(0, 2))
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -339,7 +383,7 @@ class _CardWidget extends StatelessWidget {
             style: TextStyle(
               fontSize: size * 0.28,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AfroTheme.textPrimary,
             ),
           ),
         ],

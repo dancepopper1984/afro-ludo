@@ -4,10 +4,6 @@ import '../../models/piece.dart';
 import '../../models/player.dart';
 import 'board_layout.dart';
 
-/// 棋子渲染层
-///
-/// 在 LudoBoard 上方显示所有玩家的棋子。
-/// 根据 GameState 中每个 piece 的 status/position 计算棋盘坐标。
 class PiecesLayer extends StatelessWidget {
   final double boardSize;
   final List<Player> players;
@@ -51,8 +47,8 @@ class PiecesLayer extends StatelessWidget {
         pieces.add(
           AnimatedPositioned(
             key: ValueKey('piece_${player.id}_${piece.id}'),
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.bounceOut,
             left: left,
             top: top,
             width: cellSize,
@@ -62,7 +58,9 @@ class PiecesLayer extends StatelessWidget {
               playerColor: Color(player.color),
               cellSize: cellSize,
               isMovable: isMovable && isCurrentPlayer,
-              isHighlighted: isMovable && isCurrentPlayer && phase == GamePhase.selecting,
+              isHighlighted: isMovable &&
+                  isCurrentPlayer &&
+                  phase == GamePhase.selecting,
               onTap: onPieceTap,
             ),
           ),
@@ -74,8 +72,7 @@ class PiecesLayer extends StatelessWidget {
   }
 }
 
-/// 单个棋子 Widget
-class _PieceWidget extends StatelessWidget {
+class _PieceWidget extends StatefulWidget {
   final Piece piece;
   final Color playerColor;
   final double cellSize;
@@ -93,48 +90,106 @@ class _PieceWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final canTap = isMovable && onTap != null;
+  State<_PieceWidget> createState() => _PieceWidgetState();
+}
 
-    return GestureDetector(
-      onTap: canTap ? () => onTap!(piece) : null,
+class _PieceWidgetState extends State<_PieceWidget>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _pulseController;
+  Animation<double>? _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isHighlighted) {
+      _startPulse();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _PieceWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isHighlighted && !oldWidget.isHighlighted) {
+      _startPulse();
+    } else if (!widget.isHighlighted && oldWidget.isHighlighted) {
+      _stopPulse();
+    }
+  }
+
+  void _startPulse() {
+    _pulseController?.dispose();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.12).animate(
+      CurvedAnimation(parent: _pulseController!, curve: Curves.easeInOut),
+    );
+  }
+
+  void _stopPulse() {
+    _pulseController?.dispose();
+    _pulseController = null;
+    _pulseAnimation = null;
+  }
+
+  @override
+  void dispose() {
+    _pulseController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final canTap = widget.isMovable && widget.onTap != null;
+    final baseSize = widget.cellSize * 0.72;
+    final highlightSize = widget.cellSize * 0.88;
+
+    Widget pieceWidget = GestureDetector(
+      onTap: canTap ? () => widget.onTap!(widget.piece) : null,
       child: Center(
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          width: isHighlighted ? cellSize * 0.9 : cellSize * 0.75,
-          height: isHighlighted ? cellSize * 0.9 : cellSize * 0.75,
+          width: widget.isHighlighted ? highlightSize : baseSize,
+          height: widget.isHighlighted ? highlightSize : baseSize,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: playerColor,
-            border: isHighlighted
-                ? Border.all(color: Colors.white, width: 3)
-                : Border.all(color: Colors.black.withValues(alpha: 0.3), width: 1),
-            boxShadow: isHighlighted
+            color: widget.playerColor,
+            border: Border.all(
+              color: const Color(0xFFFFD700),
+              width: widget.isHighlighted ? 2.5 : 1.5,
+            ),
+            boxShadow: widget.isHighlighted
                 ? [
                     BoxShadow(
-                      color: playerColor.withValues(alpha: 0.6),
-                      blurRadius: 8,
-                      spreadRadius: 2,
+                      color: const Color(0xFFFFD700).withValues(alpha: 0.7),
+                      blurRadius: 12,
+                      spreadRadius: 3,
+                    ),
+                    BoxShadow(
+                      color: widget.playerColor.withValues(alpha: 0.4),
+                      blurRadius: 6,
+                      spreadRadius: 1,
                     ),
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 2,
-                      offset: const Offset(1, 1),
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 3,
+                      offset: const Offset(1, 2),
                     ),
                   ],
           ),
           child: Center(
             child: Text(
-              '${piece.id + 1}',
-              style: TextStyle(
+              '${widget.piece.id + 1}',
+              style: const TextStyle(
                 color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
                 shadows: [
                   Shadow(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Colors.black54,
                     blurRadius: 2,
                   ),
                 ],
@@ -144,5 +199,20 @@ class _PieceWidget extends StatelessWidget {
         ),
       ),
     );
+
+    if (widget.isHighlighted && _pulseAnimation != null) {
+      return AnimatedBuilder(
+        animation: _pulseAnimation!,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _pulseAnimation!.value,
+            child: child,
+          );
+        },
+        child: pieceWidget,
+      );
+    }
+
+    return pieceWidget;
   }
 }
